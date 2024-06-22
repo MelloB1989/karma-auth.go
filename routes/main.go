@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	user "karma_auth/handlers/users"
+	middlewares "karma_auth/middlewares"
 )
 
 func Users() *fiber.App {
@@ -11,7 +12,8 @@ func Users() *fiber.App {
 
 	//User routes
 	users := v1.Group("/users")
-	users.Get("/create", user.CreateUser)
+	users.Get("/h", user.GetUsers)
+	users.Post("/create", middlewares.IsKarmaOrganisation, user.CreateUser)
 
 	//Organisation routes
 	organisations := v1.Group("/organisations")

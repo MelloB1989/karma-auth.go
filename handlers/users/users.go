@@ -15,7 +15,15 @@ type ResponseHTTP struct {
 	Message string      `json:"message"`
 }
 
-func CreateUser(c *fiber.Ctx) error {
+type CreateUserRequest struct {
+	Name	 string `json:"name" form:"name"`
+	Email	 string `json:"email" form:"email"`
+	Password string `json:"password" form:"password"`
+	Phone	 string `json:"phone" form:"phone"`
+	Details	 string `json:"details" form:"details"`
+}
+
+func GetUsers(c *fiber.Ctx) error {
 	users, err := user.GetUsers()
 	if err == nil {
 		return c.JSON(ResponseHTTP{
@@ -30,4 +38,22 @@ func CreateUser(c *fiber.Ctx) error {
 			Data:    nil,
 		})
 	}
+}
+
+func CreateUser(c *fiber.Ctx) error {
+	req := new(CreateUserRequest)
+	if err := c.BodyParser(req); err != nil {
+		return c.Status(400).JSON(ResponseHTTP{
+			Success: false,
+			Message: "Failed to parse request body.",
+			Data:    nil,
+		})
+	}
+	oid := c.Locals("oid").(string)
+	user.CreateUser(oid, req.Name, req.Email, req.Password, req.Phone, req.Details)
+	return c.JSON(ResponseHTTP{
+		Success: true,
+		Message: "Successfully created user.",
+		Data:    nil,
+	})
 }

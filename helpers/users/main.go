@@ -3,7 +3,10 @@ package users
 import (
 	"karma_auth/database"
 	"log"
+	"time"
+
 	_ "github.com/lib/pq"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 func GetUsers() ([]database.User, error) {
@@ -32,4 +35,21 @@ func GetUsers() ([]database.User, error) {
     }
 
     return users, nil
+}
+
+func CreateUser(oid string, name string, email string, password string, phone string, details string){
+	db, err := database.DBConn()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	
+	//Generate a uid
+	id, _ := gonanoid.Generate("qwertyuiopasdfghjklzxcvbnm1234567890_-", 10);
+	uid := oid + "---" + id
+
+	r, err := db.Exec(`INSERT INTO users (uid, oid, name, email, password, phone, details, "createdAt", "email_verified", "phone_verified") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, uid, oid, name, email, password, phone, details, time.Now(), false, false)
+
+	if err != nil || r == nil {
+		log.Fatalln(err)
+	}
 }
